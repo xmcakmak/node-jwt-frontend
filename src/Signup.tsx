@@ -1,14 +1,13 @@
 import React, { useState } from "react"
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Validation from "./SignUpValidation";
+import axios from 'axios';
 
 function Signup() {
 
-    const [values, setValues] = useState<any>({
-        name: '',
-        email: '',
-        password: ''
-    });
+    const [name, setName] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
 
     const [errors, setErrors] = useState<any>({
         email: '',
@@ -16,13 +15,26 @@ function Signup() {
         name: ''
     });
 
-    const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValues((prev: any) => ({ ...prev, [event.target.name]: [event.target.value]}))
+    const navigate = useNavigate();
+    const handleChange = (setState: any) => (event: any) => {
+        setState(event.target.value);
     };
+
 
     const handleSubmit = (event:  React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setErrors(Validation(values));
+        //setErrors(Validation(values));
+        if(errors.email === "" && errors.password === "") {
+            axios.post('http://localhost:8080/api/auth/signup', {
+                username: email,
+                password: password
+            })
+            .then(res => {
+                console.log(res);
+                navigate('/');
+            })
+            .catch(err => console.error(err))
+        }
     }
 
   return (
@@ -34,8 +46,8 @@ function Signup() {
                     <label htmlFor="email"><strong>Name</strong></label>
                     <input type="text" placeholder="Enter Name"
                         name="name"
-                        value={values.name}
-                        onChange={handleInput}
+                        value={name}
+                        onChange={handleChange(setName)}
                         className="form-control rounded-0"/>
                         {errors.name && <span className="text-danger">{errors.name}</span>}
                 </div>
@@ -43,8 +55,8 @@ function Signup() {
                         <label htmlFor="email"><strong>Email</strong></label>
                         <input type="email" placeholder="Enter Email" 
                             name="email"
-                            value={values.email}
-                            onChange={handleInput}
+                            value={email}
+                            onChange={handleChange(setEmail)}
                             className="form-control rounded-0"/>
                             {errors.email && <span className="text-danger">{errors.email}</span>}
                     </div>
@@ -52,8 +64,8 @@ function Signup() {
                         <label htmlFor="password"><strong>Password</strong></label>
                         <input type="password" placeholder="Enter Password"
                             name="password"
-                            value={values.password}
-                            onChange={handleInput}
+                            value={password}
+                            onChange={handleChange(setPassword)}
                             className="form-control rounded-0"/>
                         {errors.password && <span className="text-danger">{errors.password}</span>}
                     </div>

@@ -1,25 +1,40 @@
-import React, { useState } from "react"
-import { Link } from 'react-router-dom'
+import React, { useContext, useState } from "react"
+import { Link, useNavigate } from 'react-router-dom'
 import Validation from "./LoginValidation";
+import axios from 'axios';
+import { GlobalContext } from "./GlobalState";
+
 
 export default function Login() {
-    const [values, setValues] = useState<any>({
-        email: '',
-        password: ''
-    });
-
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
     const [errors, setErrors] = useState<any>({
         email: '',
         password: ''
     });
 
-    const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValues((prev: any) => ({ ...prev, [event.target.name]: [event.target.value]}))
+    const { deger, setUser } = useContext(GlobalContext);
+    const navigate = useNavigate();
+
+    const handleChange = (setState: any) => (event: any) => {
+        setState(event.target.value);
     };
 
     const handleSubmit = (event:  React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setErrors(Validation(values));
+        //setErrors(Validation(values));
+        if(errors.email === "" && errors.password === "") {
+            axios.post('http://localhost:8080/api/auth/signin', {
+                email: email,
+                password: password,
+            })
+            .then(res => { 
+                console.log(res);
+                setUser(res.data);
+                navigate('/home');
+            })
+            .catch(err => console.error(err))
+        }
     }
 
     return(
@@ -29,10 +44,10 @@ export default function Login() {
                 <form action="" onSubmit={handleSubmit}>
                     <div className="mb-3">
                         <label htmlFor="email"><strong>Email</strong></label>
-                        <input type="email" placeholder="Enter Email" 
+                        <input type="text" placeholder="Enter Email" 
                             name="email"
-                            value={values.email}
-                            onChange={handleInput}
+                            value={email}
+                            onChange={handleChange(setEmail)}
                             className="form-control rounded-0"/>
                             {errors.email && <span className="text-danger">{errors.email}</span>}
                     </div>
@@ -40,8 +55,8 @@ export default function Login() {
                         <label htmlFor="password"><strong>Password</strong></label>
                         <input type="password" placeholder="Enter Password"
                             name="password"
-                            value={values.password}
-                            onChange={handleInput}
+                            value={password}
+                            onChange={handleChange(setPassword)}
                             className="form-control rounded-0"/>
                         {errors.password && <span className="text-danger">{errors.password}</span>}
                     </div>
