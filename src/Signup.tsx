@@ -5,14 +5,14 @@ import axios from 'axios';
 
 function Signup() {
 
-    const [name, setName] = useState<string>('');
+    const [username, setUsername] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
 
     const [errors, setErrors] = useState<any>({
         email: '',
         password: '',
-        name: ''
+        username: ''
     });
 
     const navigate = useNavigate();
@@ -23,14 +23,15 @@ function Signup() {
 
     const handleSubmit = (event:  React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        //setErrors(Validation(values));
-        if(errors.email === "" && errors.password === "") {
+
+        setErrors(Validation({ username: username, email: email, password: password}));
+        if(errors.username === "" && errors.email === "" && errors.password === "") {
             axios.post('http://localhost:8080/api/auth/signup', {
-                username: email,
+                username: username,
+                email: email,
                 password: password
             })
             .then(res => {
-                console.log(res);
                 navigate('/');
             })
             .catch(err => console.error(err))
@@ -43,13 +44,13 @@ function Signup() {
             <h2>Sign Up</h2>
             <form action="" onSubmit={handleSubmit}>
                 <div className="mb-3">
-                    <label htmlFor="email"><strong>Name</strong></label>
-                    <input type="text" placeholder="Enter Name"
-                        name="name"
-                        value={name}
-                        onChange={handleChange(setName)}
+                    <label htmlFor="email"><strong>User Name</strong></label>
+                    <input type="text" placeholder="Enter User Name"
+                        name="username"
+                        value={username}
+                        onChange={handleChange(setUsername)}
                         className="form-control rounded-0"/>
-                        {errors.name && <span className="text-danger">{errors.name}</span>}
+                        {errors.username && <span className="text-danger">{errors.username}</span>}
                 </div>
                 <div className="mb-3">
                         <label htmlFor="email"><strong>Email</strong></label>

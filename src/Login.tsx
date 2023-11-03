@@ -4,6 +4,11 @@ import Validation from "./LoginValidation";
 import axios from 'axios';
 import { GlobalContext } from "./GlobalState";
 
+interface Errors {
+    email: string;
+    password: string;
+}
+
 
 export default function Login() {
     const [email, setEmail] = useState<string>('');
@@ -13,7 +18,7 @@ export default function Login() {
         password: ''
     });
 
-    const { deger, setUser } = useContext(GlobalContext);
+    const { setUser } = useContext(GlobalContext);
     const navigate = useNavigate();
 
     const handleChange = (setState: any) => (event: any) => {
@@ -22,19 +27,22 @@ export default function Login() {
 
     const handleSubmit = (event:  React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        //setErrors(Validation(values));
-        if(errors.email === "" && errors.password === "") {
-            axios.post('http://localhost:8080/api/auth/signin', {
-                email: email,
-                password: password,
-            })
-            .then(res => { 
-                console.log(res);
-                setUser(res.data);
-                navigate('/home');
-            })
-            .catch(err => console.error(err))
-        }
+        const validationErrors = Validation({ email: email, password: password });
+        setErrors(validationErrors);
+
+        if(Object.values(validationErrors).every(error => error === '')){
+            
+                axios.post('http://localhost:8080/api/auth/signin', {
+                    email: email,
+                    password: password,
+                })
+                .then(res => { 
+                    console.log(res);
+                    setUser(res.data);
+                    navigate('/home');
+                })
+                .catch(err => console.error(err))
+        } 
     }
 
     return(
